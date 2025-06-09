@@ -2,13 +2,12 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import logica.Pregunta;
-import logica.GestorPreguntas;
 
 public class PanelPrueba extends JFrame {
     private List<Pregunta> preguntas;
@@ -17,18 +16,12 @@ public class PanelPrueba extends JFrame {
     private JLabel lblEnunciado, lblTiempo;
     private JPanel panelOpciones;
     private JButton btnSiguiente, btnAnterior, btnEntregar;
-    private Timer temporizador;
     private Map<Pregunta, String> respuestasUsuario = new HashMap<>();
+    private Timer temporizador;
 
-    public PanelPrueba(GestorPreguntas gestor, int tiempo) {
-        preguntas = gestor.getPreguntas();
-
-        // Verificar si la primera línea es un encabezado
-        if (!preguntas.isEmpty() && preguntas.get(0).getEnunciado().equals("Enunciado")) {
-            preguntas.remove(0); // Eliminar encabezado si está presente
-        }
-
-        tiempoRestante = tiempo * 60; // Convertir minutos a segundos
+    public PanelPrueba(List<Pregunta> preguntasSeleccionadas, int tiempoTotal) {
+        this.preguntas = preguntasSeleccionadas;
+        this.tiempoRestante = tiempoTotal * 60; // Convertir minutos a segundos
 
         setTitle("Prueba en Curso");
         setSize(500, 350);
@@ -37,7 +30,7 @@ public class PanelPrueba extends JFrame {
         setLayout(new BorderLayout());
 
         // Panel superior para mostrar el tiempo restante
-        lblTiempo = new JLabel("Tiempo restante: " + tiempoRestante + " segundos", SwingConstants.CENTER);
+        lblTiempo = new JLabel("Tiempo restante: " + formatTiempo(tiempoRestante), SwingConstants.CENTER);
         add(lblTiempo, BorderLayout.NORTH);
 
         // Panel central para mostrar la pregunta y opciones
@@ -68,19 +61,19 @@ public class PanelPrueba extends JFrame {
         panelBotones.add(btnEntregar);
         add(panelBotones, BorderLayout.SOUTH);
 
-        // Inicializar temporizador
-        temporizador = new Timer(1000, new ActionListener() {
+        // Inicializar temporizador con formato `MM:SS`
+        temporizador = new Timer();
+        temporizador.scheduleAtFixedRate(new TimerTask() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void run() {
                 tiempoRestante--;
-                lblTiempo.setText("Tiempo restante: " + tiempoRestante + " segundos");
+                lblTiempo.setText("Tiempo restante: " + formatTiempo(tiempoRestante));
                 if (tiempoRestante <= 0) {
-                    temporizador.stop();
+                    temporizador.cancel();
                     entregarPrueba();
                 }
             }
-        });
-        temporizador.start();
+        }, 1000, 1000);
 
         // Mostrar la primera pregunta correctamente
         if (!preguntas.isEmpty()) {
@@ -97,9 +90,9 @@ public class PanelPrueba extends JFrame {
 
             lblEnunciado.setText("Pregunta: " + pregunta.getEnunciado());
 
-            // Limpiar opciones anteriores
             panelOpciones.removeAll();
             ButtonGroup grupoOpciones = new ButtonGroup();
+            String respuestaGuardada = respuestasUsuario.getOrDefault(pregunta, "");
 
             if (pregunta.getTipo().equalsIgnoreCase("Seleccion Multiple")) {
                 for (String opcion : pregunta.getOpciones()) {
@@ -107,7 +100,12 @@ public class PanelPrueba extends JFrame {
                         JRadioButton rb = new JRadioButton(opcion);
                         grupoOpciones.add(rb);
                         panelOpciones.add(rb);
-                        
+
+                        // Mantener selección previa
+                        if (opcion.equals(respuestaGuardada)) {
+                            rb.setSelected(true);
+                        }
+
                         rb.addActionListener(e -> respuestasUsuario.put(pregunta, opcion));
                     }
                 }
@@ -119,6 +117,12 @@ public class PanelPrueba extends JFrame {
                 panelOpciones.add(rbVerdadero);
                 panelOpciones.add(rbFalso);
 
+                if (respuestaGuardada.equals("Verdadero")) {
+                    rbVerdadero.setSelected(true);
+                } else if (respuestaGuardada.equals("Falso")) {
+                    rbFalso.setSelected(true);
+                }
+
                 rbVerdadero.addActionListener(e -> respuestasUsuario.put(pregunta, "Verdadero"));
                 rbFalso.addActionListener(e -> respuestasUsuario.put(pregunta, "Falso"));
             }
@@ -129,8 +133,14 @@ public class PanelPrueba extends JFrame {
     }
 
     private void entregarPrueba() {
-        temporizador.stop();
+        temporizador.cancel();
         dispose();
-        new PanelResultados(preguntas, respuestasUsuario); // Ahora pasa el mapa de respuestas
+        new PanelResultados(preguntas, respuestasUsuario);
+    }
+
+    private String formatTiempo(int tiempoEnSegundos) {
+        int minutos = tiempoEnSegundos / 60;
+        int segundos = tiempoEnSegundos % 60;
+        return String.format("%02d:%02d", minutos, segundos);
     }
 }
