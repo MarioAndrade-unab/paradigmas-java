@@ -18,7 +18,7 @@ Los usuarios pueden cargar un archivo de preguntas, elegir las preguntas, realiz
 - **Tiempo total de la prueba calculado dinámicamente** en función de las preguntas seleccionadas.
 - **Cuenta regresiva en formato `MM:SS`, mostrando minutos y segundos.**
 - **Persistencia de respuestas al cambiar entre preguntas**, permitiendo corregir antes de finalizar.
-- **Entrega de resultados según Taxonomia y por tipo de pregunta (V/F o Seleccion Multiple) **, permitiendo ir a revisar las preguntas o finalizar.
+- **Entrega de resultados según Taxonomia y por tipo de pregunta (V/F o Seleccion Multiple)**, permitiendo ir a revisar las preguntas o finalizar.
 - **Muestra las preguntas con la selección del usuario y la respuesta correcta**, permitiendo desplazarse entre las preguntas o volver a los resultados.
 
 
