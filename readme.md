@@ -17,7 +17,9 @@ Los usuarios pueden cargar un archivo de preguntas, elegir las preguntas, realiz
 - **Selección de preguntas antes de iniciar la prueba.**
 - **Tiempo total de la prueba calculado dinámicamente** en función de las preguntas seleccionadas.
 - **Cuenta regresiva en formato `MM:SS`, mostrando minutos y segundos.**
-- **Persistencia de respuestas al cambiar entre preguntas**, permitiendo corregir antes de finalizar.  
+- **Persistencia de respuestas al cambiar entre preguntas**, permitiendo corregir antes de finalizar.
+- **Entrega de resultados según Taxonomia y por tipo de pregunta (V/F o Seleccion Multiple) **, permitiendo ir a revisar las preguntas o finalizar.
+- **Muestra las preguntas con la selección del usuario y la respuesta correcta**, permitiendo desplazarse entre las preguntas o volver a los resultados.
 
 
 
@@ -52,10 +54,9 @@ src/
 │── README.md    # Documentación del proyecto
 ```
 
-##  Tecnologías Utilizadas
-- **Java 17**  
-- **Swing (para la GUI)**  
-- **Eclipse IDE**  
+##  Integrantes
+- **Mario Andrade**  
+- **José Serrano**  
 ---
 
  
