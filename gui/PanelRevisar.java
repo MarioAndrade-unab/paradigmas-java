@@ -11,11 +11,13 @@ public class PanelRevisar extends JFrame {
     private Map<Pregunta, String> respuestasUsuario;
     private int indicePregunta = 0;
     private JLabel lblEnunciado, lblRespuestaUsuario, lblRespuestaCorrecta;
-    private JButton btnSiguiente, btnAnterior, btnSalir;
+    private JButton btnSiguiente, btnAnterior, btnVolver;
+    private JFrame panelResultados;
 
-    public PanelRevisar(List<Pregunta> preguntasRealizadas, Map<Pregunta, String> respuestasUsuario) {
+    public PanelRevisar(List<Pregunta> preguntasRealizadas, Map<Pregunta, String> respuestasUsuario, JFrame panelResultados) {
         this.preguntas = preguntasRealizadas;
         this.respuestasUsuario = respuestasUsuario;
+        this.panelResultados = panelResultados; // Guarda la referencia a la ventana de resultados
 
         setTitle("Revisión de la Prueba");
         setSize(500, 300);
@@ -41,15 +43,15 @@ public class PanelRevisar extends JFrame {
         JPanel panelBotones = new JPanel();
         btnAnterior = new JButton("Anterior");
         btnSiguiente = new JButton("Siguiente");
-        btnSalir = new JButton("Salir");
+        btnVolver = new JButton("Volver a Resultados");
 
         btnAnterior.addActionListener(e -> mostrarPregunta(indicePregunta - 1));
         btnSiguiente.addActionListener(e -> mostrarPregunta(indicePregunta + 1));
-        btnSalir.addActionListener(e -> cerrarVentana());
+        btnVolver.addActionListener(e -> volverAResultados());
 
         panelBotones.add(btnAnterior);
         panelBotones.add(btnSiguiente);
-        panelBotones.add(btnSalir);
+        panelBotones.add(btnVolver);
         add(panelBotones, BorderLayout.SOUTH);
 
         // Mostrar la primera pregunta
@@ -71,7 +73,8 @@ public class PanelRevisar extends JFrame {
         }
     }
 
-    private void cerrarVentana() {
-        dispose();
+    private void volverAResultados() {
+        dispose(); // Cierra `PanelRevisar`
+        panelResultados.setVisible(true); // Vuelve a `PanelResultados`
     }
 }

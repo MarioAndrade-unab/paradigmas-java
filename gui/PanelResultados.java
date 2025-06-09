@@ -2,103 +2,108 @@ package gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import logica.Pregunta;
+import logica.NivelTaxonomico;
 
 public class PanelResultados extends JFrame {
     private List<Pregunta> preguntas;
     private Map<Pregunta, String> respuestasUsuario;
 
-    public PanelResultados(List<Pregunta> preguntasRealizadas, Map<Pregunta, String> respuestasUsuario) {
-        this.preguntas = preguntasRealizadas;
+    public PanelResultados(List<Pregunta> preguntas, Map<Pregunta, String> respuestasUsuario) {
+        this.preguntas = preguntas;
         this.respuestasUsuario = respuestasUsuario;
 
         setTitle("Resultados de la Prueba");
-        setSize(500, 400);
+        setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JPanel panelResumen = new JPanel();
-        panelResumen.setLayout(new GridLayout(0, 1));
+        JLabel lblTitulo = new JLabel("Resultados de la Prueba", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
+        add(lblTitulo, BorderLayout.NORTH);
 
-        JLabel lblTitulo = new JLabel("Resumen de respuestas:", SwingConstants.CENTER);
-        panelResumen.add(lblTitulo);
-
-        Map<String, Integer> conteo = contarRespuestasPorTipo();
-        int totalCorrectas = conteo.get("TotalCorrectas");
-        int totalPreguntas = conteo.get("TotalPreguntas");
-        int totalNoRespondidas = totalPreguntas - respuestasUsuario.size();
-
-        int correctasVF = conteo.get("Verdadero/Falso Correctas");
-        int incorrectasVF = conteo.get("Verdadero/Falso Incorrectas");
-        int totalVF = correctasVF + incorrectasVF;
-        int porcentajeVF = totalVF > 0 ? (correctasVF * 100 / totalVF) : 0;
-
-        int correctasSM = conteo.get("Seleccion Multiple Correctas");
-        int incorrectasSM = conteo.get("Seleccion Multiple Incorrectas");
-        int totalSM = correctasSM + incorrectasSM;
-        int porcentajeSM = totalSM > 0 ? (correctasSM * 100 / totalSM) : 0;
-
-        JLabel lblCorrectasVF = new JLabel("Verdadero/Falso: " + correctasVF + " correctas, " + incorrectasVF + " incorrectas (" + porcentajeVF + "% de aciertos)", SwingConstants.CENTER);
-        JLabel lblCorrectasSM = new JLabel("Selección Múltiple: " + correctasSM + " correctas, " + incorrectasSM + " incorrectas (" + porcentajeSM + "% de aciertos)", SwingConstants.CENTER);
-        JLabel lblTotalPorcentaje = new JLabel("Porcentaje total de respuestas correctas: " + (totalCorrectas * 100 / totalPreguntas) + "%", SwingConstants.CENTER);
-        JLabel lblNoRespondidas = new JLabel("Preguntas no contestadas: " + totalNoRespondidas, SwingConstants.CENTER);
-
-        panelResumen.add(lblCorrectasVF);
-        panelResumen.add(lblCorrectasSM);
-        panelResumen.add(lblTotalPorcentaje);
-        panelResumen.add(lblNoRespondidas);
-
-        JButton btnRevisarPrueba = new JButton("Revisar respuestas");
-        btnRevisarPrueba.addActionListener(e -> revisarPrueba());
-
-        add(panelResumen, BorderLayout.CENTER);
-        add(btnRevisarPrueba, BorderLayout.SOUTH);
+        calcularResultados();
+        agregarBotones();
 
         setVisible(true);
     }
 
-    private Map<String, Integer> contarRespuestasPorTipo() {
-        Map<String, Integer> conteoPorTipo = new HashMap<>();
-        conteoPorTipo.put("Verdadero/Falso Correctas", 0);
-        conteoPorTipo.put("Seleccion Multiple Correctas", 0);
-        conteoPorTipo.put("Verdadero/Falso Incorrectas", 0);
-        conteoPorTipo.put("Seleccion Multiple Incorrectas", 0);
+    private void calcularResultados() {
+        // Mapas para respuestas correctas por nivel taxonómico
+        Map<NivelTaxonomico, Integer> respuestasCorrectasPorNivel = new HashMap<>();
+        Map<NivelTaxonomico, Integer> totalPreguntasPorNivel = new HashMap<>();
 
-        int totalCorrectas = 0;
-        int totalPreguntas = preguntas.size();
+        // Mapas para respuestas correctas por tipo de pregunta
+        Map<String, Integer> respuestasCorrectasPorTipo = new HashMap<>();
+        Map<String, Integer> totalPreguntasPorTipo = new HashMap<>();
 
         for (Pregunta pregunta : preguntas) {
-            String respuestaUsuario = respuestasUsuario.get(pregunta);
-            boolean esCorrecta = respuestaUsuario != null && respuestaUsuario.equalsIgnoreCase(pregunta.getRespuestaCorrecta());
+            NivelTaxonomico nivel = pregunta.getNivel();
+            String tipoPregunta = pregunta.getTipo();
 
-            if (esCorrecta) {
-                totalCorrectas++;
-                if (pregunta.getTipo().equalsIgnoreCase("Verdadero/Falso")) {
-                    conteoPorTipo.put("Verdadero/Falso Correctas", conteoPorTipo.get("Verdadero/Falso Correctas") + 1);
-                } else if (pregunta.getTipo().equalsIgnoreCase("Seleccion Multiple")) {
-                    conteoPorTipo.put("Seleccion Multiple Correctas", conteoPorTipo.get("Seleccion Multiple Correctas") + 1);
-                }
-            } else { // Contar respuestas incorrectas
-                if (pregunta.getTipo().equalsIgnoreCase("Verdadero/Falso")) {
-                    conteoPorTipo.put("Verdadero/Falso Incorrectas", conteoPorTipo.get("Verdadero/Falso Incorrectas") + 1);
-                } else if (pregunta.getTipo().equalsIgnoreCase("Seleccion Multiple")) {
-                    conteoPorTipo.put("Seleccion Multiple Incorrectas", conteoPorTipo.get("Seleccion Multiple Incorrectas") + 1);
-                }
+            totalPreguntasPorNivel.put(nivel, totalPreguntasPorNivel.getOrDefault(nivel, 0) + 1);
+            totalPreguntasPorTipo.put(tipoPregunta, totalPreguntasPorTipo.getOrDefault(tipoPregunta, 0) + 1);
+
+            String respuestaUsuario = respuestasUsuario.get(pregunta);
+            if (respuestaUsuario != null && respuestaUsuario.equals(pregunta.getRespuestaCorrecta())) {
+                respuestasCorrectasPorNivel.put(nivel, respuestasCorrectasPorNivel.getOrDefault(nivel, 0) + 1);
+                respuestasCorrectasPorTipo.put(tipoPregunta, respuestasCorrectasPorTipo.getOrDefault(tipoPregunta, 0) + 1);
             }
         }
 
-        conteoPorTipo.put("TotalCorrectas", totalCorrectas);
-        conteoPorTipo.put("TotalPreguntas", totalPreguntas);
+        // Construcción del desglose por nivel taxonómico
+        StringBuilder resultadosNivel = new StringBuilder("<html><b>Resultados por Nivel Taxonómico:</b><br>");
+        for (NivelTaxonomico nivel : totalPreguntasPorNivel.keySet()) {
+            int total = totalPreguntasPorNivel.get(nivel);
+            int correctas = respuestasCorrectasPorNivel.getOrDefault(nivel, 0);
+            double porcentaje = (correctas / (double) total) * 100;
+            resultadosNivel.append(String.format("%s: %.2f%% (%d de %d correctas)<br>", nivel, porcentaje, correctas, total));
+        }
+        resultadosNivel.append("</html>");
 
-        return conteoPorTipo;
+        // Construcción del desglose por tipo de pregunta
+        StringBuilder resultadosTipo = new StringBuilder("<html><b>Resultados por Tipo de Pregunta:</b><br>");
+        for (String tipo : totalPreguntasPorTipo.keySet()) {
+            int total = totalPreguntasPorTipo.get(tipo);
+            int correctas = respuestasCorrectasPorTipo.getOrDefault(tipo, 0);
+            double porcentaje = (correctas / (double) total) * 100;
+            resultadosTipo.append(String.format("%s: %.2f%% (%d de %d correctas)<br>", tipo, porcentaje, correctas, total));
+        }
+        resultadosTipo.append("</html>");
+
+        // Mostrar en la interfaz
+        JLabel lblResultadosNivel = new JLabel(resultadosNivel.toString());
+        JLabel lblResultadosTipo = new JLabel(resultadosTipo.toString());
+
+        JPanel panelResultados = new JPanel();
+        panelResultados.setLayout(new GridLayout(2, 1));
+        panelResultados.add(lblResultadosNivel);
+        panelResultados.add(lblResultadosTipo);
+
+        add(panelResultados, BorderLayout.CENTER);
     }
 
-    private void revisarPrueba() {
-        dispose();
-        new PanelRevisar(preguntas, respuestasUsuario); // Ahora pasa el mapa de respuestas
+    private void agregarBotones() {
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new FlowLayout());
+
+        JButton btnRevisarRespuestas = new JButton("Revisar respuestas");
+        JButton btnSalir = new JButton("Salir");
+
+        btnRevisarRespuestas.addActionListener(e -> revisarRespuestas());
+        btnSalir.addActionListener(e -> System.exit(0)); // Salir del programa
+
+        panelBotones.add(btnRevisarRespuestas);
+        panelBotones.add(btnSalir);
+        add(panelBotones, BorderLayout.SOUTH);
+    }
+
+    private void revisarRespuestas() {
+        dispose(); // Cierra `PanelResultados`
+        new PanelRevisar(preguntas, respuestasUsuario, this); // Ahora pasa el mapa de respuestas
     }
 }

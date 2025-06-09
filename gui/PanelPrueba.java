@@ -13,15 +13,15 @@ public class PanelPrueba extends JFrame {
     private List<Pregunta> preguntas;
     private int tiempoRestante;
     private int indicePregunta = 0;
-    private JLabel lblEnunciado, lblTiempo;
+    private JLabel lblEnunciado, lblTiempo, lblProgreso;
     private JPanel panelOpciones;
-    private JButton btnSiguiente, btnAnterior, btnEntregar;
+    private JButton btnSiguiente, btnAnterior;
     private Map<Pregunta, String> respuestasUsuario = new HashMap<>();
     private Timer temporizador;
 
     public PanelPrueba(List<Pregunta> preguntasSeleccionadas, int tiempoTotal) {
         this.preguntas = preguntasSeleccionadas;
-        this.tiempoRestante = tiempoTotal * 60; // Convertir minutos a segundos
+        this.tiempoRestante = tiempoTotal * 60;
 
         setTitle("Prueba en Curso");
         setSize(500, 350);
@@ -29,11 +29,17 @@ public class PanelPrueba extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // Panel superior para mostrar el tiempo restante
-        lblTiempo = new JLabel("Tiempo restante: " + formatTiempo(tiempoRestante), SwingConstants.CENTER);
-        add(lblTiempo, BorderLayout.NORTH);
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setLayout(new GridLayout(2, 1));
 
-        // Panel central para mostrar la pregunta y opciones
+        lblProgreso = new JLabel("", SwingConstants.CENTER);
+        panelSuperior.add(lblProgreso);
+
+        lblTiempo = new JLabel("Tiempo restante: " + formatTiempo(tiempoRestante), SwingConstants.CENTER);
+        panelSuperior.add(lblTiempo);
+
+        add(panelSuperior, BorderLayout.NORTH);
+
         JPanel panelCentral = new JPanel();
         panelCentral.setLayout(new BorderLayout());
 
@@ -41,27 +47,22 @@ public class PanelPrueba extends JFrame {
         panelCentral.add(lblEnunciado, BorderLayout.NORTH);
 
         panelOpciones = new JPanel();
-        panelOpciones.setLayout(new GridLayout(0, 1)); // Organiza las opciones en filas
+        panelOpciones.setLayout(new GridLayout(0, 1));
         panelCentral.add(panelOpciones, BorderLayout.CENTER);
 
         add(panelCentral, BorderLayout.CENTER);
 
-        // Panel inferior con botones de navegación
         JPanel panelBotones = new JPanel();
         btnAnterior = new JButton("Anterior");
         btnSiguiente = new JButton("Siguiente");
-        btnEntregar = new JButton("Entregar prueba");
 
         btnAnterior.addActionListener(e -> mostrarPregunta(indicePregunta - 1));
         btnSiguiente.addActionListener(e -> mostrarPregunta(indicePregunta + 1));
-        btnEntregar.addActionListener(e -> entregarPrueba());
 
         panelBotones.add(btnAnterior);
         panelBotones.add(btnSiguiente);
-        panelBotones.add(btnEntregar);
         add(panelBotones, BorderLayout.SOUTH);
 
-        // Inicializar temporizador con formato `MM:SS`
         temporizador = new Timer();
         temporizador.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -75,7 +76,6 @@ public class PanelPrueba extends JFrame {
             }
         }, 1000, 1000);
 
-        // Mostrar la primera pregunta correctamente
         if (!preguntas.isEmpty()) {
             mostrarPregunta(0);
         }
@@ -89,8 +89,8 @@ public class PanelPrueba extends JFrame {
             Pregunta pregunta = preguntas.get(indicePregunta);
 
             lblEnunciado.setText("Pregunta: " + pregunta.getEnunciado());
-
             panelOpciones.removeAll();
+
             ButtonGroup grupoOpciones = new ButtonGroup();
             String respuestaGuardada = respuestasUsuario.getOrDefault(pregunta, "");
 
@@ -101,7 +101,6 @@ public class PanelPrueba extends JFrame {
                         grupoOpciones.add(rb);
                         panelOpciones.add(rb);
 
-                        // Mantener selección previa
                         if (opcion.equals(respuestaGuardada)) {
                             rb.setSelected(true);
                         }
@@ -127,9 +126,29 @@ public class PanelPrueba extends JFrame {
                 rbFalso.addActionListener(e -> respuestasUsuario.put(pregunta, "Falso"));
             }
 
+            actualizarBotones();
+            actualizarProgreso();
             panelOpciones.revalidate();
             panelOpciones.repaint();
         }
+    }
+
+    private void actualizarBotones() {
+        btnAnterior.setEnabled(indicePregunta > 0);
+
+        if (indicePregunta == preguntas.size() - 1) {
+            btnSiguiente.setText("Enviar respuestas");
+            btnSiguiente.removeActionListener(btnSiguiente.getActionListeners()[0]);
+            btnSiguiente.addActionListener(e -> entregarPrueba());
+        } else {
+            btnSiguiente.setText("Siguiente");
+            btnSiguiente.removeActionListener(btnSiguiente.getActionListeners()[0]);
+            btnSiguiente.addActionListener(e -> mostrarPregunta(indicePregunta + 1));
+        }
+    }
+
+    private void actualizarProgreso() {
+        lblProgreso.setText("Pregunta " + (indicePregunta + 1) + " de " + preguntas.size());
     }
 
     private void entregarPrueba() {
