@@ -19,7 +19,7 @@ public class PanelRevisar extends JFrame {
         this.respuestasUsuario = respuestasUsuario;
         this.panelResultados = panelResultados; // Guarda la referencia a la ventana de resultados
 
-        setTitle("Revisi�n de la Prueba");
+        setTitle("Revision de la Prueba");
         setSize(500, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -41,7 +41,7 @@ public class PanelRevisar extends JFrame {
 
         add(panelCentral, BorderLayout.CENTER);
 
-        // Panel inferior con botones de navegaci�n
+        // Panel inferior con botones de navegacion
         JPanel panelBotones = new JPanel();
         btnAnterior = new JButton("Anterior");
         btnSiguiente = new JButton("Siguiente");
