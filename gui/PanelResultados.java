@@ -33,13 +33,17 @@ public class PanelResultados extends JFrame {
     }
 
     private void calcularResultados() {
-        // Mapas para respuestas correctas por nivel taxonómico
+        // Mapas para respuestas correctas por nivel taxonï¿½mico
         Map<NivelTaxonomico, Integer> respuestasCorrectasPorNivel = new HashMap<>();
         Map<NivelTaxonomico, Integer> totalPreguntasPorNivel = new HashMap<>();
 
         // Mapas para respuestas correctas por tipo de pregunta
         Map<String, Integer> respuestasCorrectasPorTipo = new HashMap<>();
         Map<String, Integer> totalPreguntasPorTipo = new HashMap<>();
+        
+        // Conteo general
+        int totalCorrectas = 0;
+        int totalPreguntas = preguntas.size();
 
         for (Pregunta pregunta : preguntas) {
             NivelTaxonomico nivel = pregunta.getNivel();
@@ -50,13 +54,19 @@ public class PanelResultados extends JFrame {
 
             String respuestaUsuario = respuestasUsuario.get(pregunta);
             if (respuestaUsuario != null && respuestaUsuario.equals(pregunta.getRespuestaCorrecta())) {
+                totalCorrectas++;
                 respuestasCorrectasPorNivel.put(nivel, respuestasCorrectasPorNivel.getOrDefault(nivel, 0) + 1);
                 respuestasCorrectasPorTipo.put(tipoPregunta, respuestasCorrectasPorTipo.getOrDefault(tipoPregunta, 0) + 1);
             }
         }
+        
+        // Resultados generales
+        double porcentajeTotal = (totalCorrectas / (double) totalPreguntas) * 100;
+        String resumenGeneral = String.format("<html><div style='font-size:14pt'><b>Resumen General:</b><br>"
+            + "%.2f%% (%d de %d correctas)</div></html>", porcentajeTotal, totalCorrectas, totalPreguntas);
 
-        // Construcción del desglose por nivel taxonómico
-        StringBuilder resultadosNivel = new StringBuilder("<html><b>Resultados por Nivel Taxonómico:</b><br>");
+        // Construcciï¿½n del desglose por nivel taxonï¿½mico
+        StringBuilder resultadosNivel = new StringBuilder("<html><b>Resultados por Nivel Taxonï¿½mico:</b><br>");
         for (NivelTaxonomico nivel : totalPreguntasPorNivel.keySet()) {
             int total = totalPreguntasPorNivel.get(nivel);
             int correctas = respuestasCorrectasPorNivel.getOrDefault(nivel, 0);
@@ -65,7 +75,7 @@ public class PanelResultados extends JFrame {
         }
         resultadosNivel.append("</html>");
 
-        // Construcción del desglose por tipo de pregunta
+        // Construcciï¿½n del desglose por tipo de pregunta
         StringBuilder resultadosTipo = new StringBuilder("<html><b>Resultados por Tipo de Pregunta:</b><br>");
         for (String tipo : totalPreguntasPorTipo.keySet()) {
             int total = totalPreguntasPorTipo.get(tipo);
@@ -76,11 +86,13 @@ public class PanelResultados extends JFrame {
         resultadosTipo.append("</html>");
 
         // Mostrar en la interfaz
+        JLabel lblResultadosGeneral = new JLabel(resumenGeneral, SwingConstants.CENTER);
         JLabel lblResultadosNivel = new JLabel(resultadosNivel.toString());
         JLabel lblResultadosTipo = new JLabel(resultadosTipo.toString());
 
         JPanel panelResultados = new JPanel();
         panelResultados.setLayout(new GridLayout(2, 1));
+        panelResultados.add(lblResultadosGeneral);
         panelResultados.add(lblResultadosNivel);
         panelResultados.add(lblResultadosTipo);
 

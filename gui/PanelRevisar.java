@@ -10,7 +10,7 @@ public class PanelRevisar extends JFrame {
     private List<Pregunta> preguntas;
     private Map<Pregunta, String> respuestasUsuario;
     private int indicePregunta = 0;
-    private JLabel lblEnunciado, lblRespuestaUsuario, lblRespuestaCorrecta;
+    private JLabel lblEnunciado, lblRespuestaUsuario, lblRespuestaCorrecta, lblNivel;
     private JButton btnSiguiente, btnAnterior, btnVolver;
     private JFrame panelResultados;
 
@@ -19,7 +19,7 @@ public class PanelRevisar extends JFrame {
         this.respuestasUsuario = respuestasUsuario;
         this.panelResultados = panelResultados; // Guarda la referencia a la ventana de resultados
 
-        setTitle("Revisión de la Prueba");
+        setTitle("Revisiï¿½n de la Prueba");
         setSize(500, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -30,16 +30,18 @@ public class PanelRevisar extends JFrame {
         panelCentral.setLayout(new GridLayout(3, 1));
 
         lblEnunciado = new JLabel("", SwingConstants.CENTER);
+        lblNivel = new JLabel("", SwingConstants.CENTER);
         lblRespuestaUsuario = new JLabel("", SwingConstants.CENTER);
         lblRespuestaCorrecta = new JLabel("", SwingConstants.CENTER);
         
         panelCentral.add(lblEnunciado);
+        panelCentral.add(lblNivel);
         panelCentral.add(lblRespuestaUsuario);
         panelCentral.add(lblRespuestaCorrecta);
 
         add(panelCentral, BorderLayout.CENTER);
 
-        // Panel inferior con botones de navegación
+        // Panel inferior con botones de navegaciï¿½n
         JPanel panelBotones = new JPanel();
         btnAnterior = new JButton("Anterior");
         btnSiguiente = new JButton("Siguiente");
@@ -68,6 +70,7 @@ public class PanelRevisar extends JFrame {
             String respuestaUsuario = respuestasUsuario.getOrDefault(pregunta, "No hubo respuesta");
 
             lblEnunciado.setText("Pregunta: " + pregunta.getEnunciado());
+            lblNivel.setText("Nivel taxonÃ³mico: " + pregunta.getNivel().toString());
             lblRespuestaUsuario.setText("Tu respuesta: " + respuestaUsuario);
             lblRespuestaCorrecta.setText("Respuesta correcta: " + pregunta.getRespuestaCorrecta());
         }
